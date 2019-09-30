@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 	"syscall"
@@ -162,6 +163,36 @@ func arrayToString(x [65]int8) string {
 	return str
 }
 
+func getHome() {
+	//home := execLinuxCmd("users")
+	if home := os.Getenv("HOME"); home != "" {
+		fmt.Println("home:", home)
+	}
+	//home, _ := exec.Command("users").Output()
+
+}
+
+
+/*
+//ExecLinuxCmd execupa comando linux passando como string
+func execLinuxCmd(cmd string) []byte {
+	out, err := exec.Command(cmd).Output()
+	check(err)
+	//fmt.Printf("return: %s\n", out)
+	return out
+}*/
+
+/*
+func execLinuxCmd(cmd string) ([]byte, error) {
+	out, err := exec.Command(cmd).Output()
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	//fmt.Printf("return: %s\n", out)
+	return out, nil
+}*/
+
 
 /*
 func showUsb() {
@@ -169,7 +200,6 @@ func showUsb() {
 	defer ctx.Close()
 
 }*/
-
 
 /*
 var (

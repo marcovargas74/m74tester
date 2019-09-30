@@ -5,8 +5,8 @@
 
 #Dados para compilar para o Apliance
 APP_NAME=appliance
-DIR_WORK_APP=~/projetos-go/src/github.com/ma022800/goma
-DIR_WORK_PUBLIC=$DIR_WORK_APP/goma/appliance/public/
+DIR_WORK_APP=~/projetos-go/src/github.com/marcovargas74/m74tester
+DIR_WORK_PUBLIC=$DIR_WORK_APP/appliance/public/
 #DIR_FIRMWARE=~/UNNITI_GIT/firmware/packetsAPP_bin/release_voip
 IP_REMOTE=172.31.1.123
 
@@ -48,7 +48,7 @@ ls -l -h
 echo "Copia o arquivo binario para o REMOTE $IP_REMOTE!!!!"
 #ls -l
 
-scp $DIR_WORK_APP/$APP_NAME  iap@$IP_REMOTE:/home/iap/appliance
+scp $DIR_WORK_APP/examples/$APP_NAME  iap@$IP_REMOTE:/home/iap/appliance
 
 echo "Arquivo copiado para para $IP_REMOTE!!!"
 

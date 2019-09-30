@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/syslog"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -13,13 +14,15 @@ import (
 )
 
 const (
-	serverDirDev  = "goma/appliance/public"
+	serverDirDev  = "/home/intelbras/projetos-go/src/github.com/marcovargas74/m74tester/appliance/public"
 	serverDirProd = "/home/iap/appliance/public"
 	serverPort    = ":8080"
 	//mode          = "prod"
 	//mode             = "dev"
-	fileHardConfDev  = "/home/intelbras/projetos-go/src/github.com/ma022800/goma/goma/appliance/public/static/hard.conf"
-	fileHardConfProd = "/home/iap/appliance/public/static/hard.conf"
+
+	//fileHardConfDev  = "/home/intelbras/projetos-go/src/github.com/marcovargas74/m74tester/appliance/public/static/hard.conf"
+	fileHardConfDev  = serverDirDev + "/static/hard.conf"
+	fileHardConfProd = serverDirProd + "/static/hard.conf"
 )
 
 //Mode é o modo do teste se "prod" ou "dev"
@@ -155,18 +158,39 @@ func formatMessage(w http.ResponseWriter, format string, a ...interface{}) {
 
 }
 
-func execLinuxCmd(cmd string) ([]byte, error) {
-	out, err := exec.Command(cmd).Output()
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
+func check(e error) {
+	if e != nil {
+		log.Fatal(e)
+		//panic(e)
 	}
-	//fmt.Printf("return: %s\n", out)
-	return out, nil
+}
+
+//GetMode return the type of teste development or production
+func GetMode() string {
+	//home := execLinuxCmd("users")
+	/*if home := os.Getenv("HOME"); home != "" {
+		fmt.Println("home:", home)
+	}*/
+	//home, err := exec.Command("users").Output()
+
+	home, err := os.UserHomeDir()
+	check(err)
+	fmt.Println("home:", home)
+	//if strings.Contains(string(execLinuxCmd("users")[:]), "intelbras") {
+	if strings.Contains(home, "intelbras") {
+		//fmt.Println("dev")
+		return "dev"
+	}
+
+	//fmt.Println("modo is prod")
+	return "prod"
 }
 
 func showUsbs() string {
-	out, _ := execLinuxCmd("lsusb")
+
+	out, err := exec.Command("lsusb").Output()
+	check(err)
+	//out := execLinuxCmd("lsusb")
 	message := string(out[:])
 	return message
 }
