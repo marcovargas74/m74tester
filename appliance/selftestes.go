@@ -3,6 +3,7 @@ package appliance
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 )
@@ -142,15 +143,15 @@ func usbsTest(w http.ResponseWriter, r *http.Request) int {
 	//FOUND=2
 	//fi
 
-	if found == 0  {
+	if found == 0 {
 		formatMessage(w, "ERR hardware USB nao encontrada")
-	    return 1
+		return 1
 	}
 
-	if found < 2  {
+	if found < 2 {
 		formatMessage(w, "WARN Apenas uma porta USB encontrada")
-	    return 2
-	  }
+		return 2
+	}
 
 	//elif [ $FOUND == 2 ]; then
 	formatMessage(w, "OK Portas USB ENCONTRADAS")
@@ -162,10 +163,18 @@ func usbsTest(w http.ResponseWriter, r *http.Request) int {
 
 //	arraySelfTest.push('lan');
 func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
-	//	formatMessage(w, "OK Inicio dos testes de memoria RAM")
-	//	formatMessage(w, "OK Teste de escrita na SDRAM")
-	formatMessage(w, "OK Teste de configuracao da %s", eth)
-	formatMessage(w, "OK Configurando a interface %s", eth)
+
+	if eth == "eth0" {
+		showInterfaces(w, r)
+
+	}
+
+	formatMessage(w, "OK Teste da Interface %s", eth)
+
+	//.
+
+	//formatMessage(w, "OK Teste de configuracao da %s", eth)
+	//formatMessage(w, "OK Configurando a interface %s", eth)
 
 	//	formatMessage(w, "ERR Erro na escrita na memoria RAM")
 	//	formatMessage(w, "OK Teste de escrita na SDRAM ocorreu com sucesso")
@@ -219,6 +228,29 @@ func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	*/
 
 	return 0
+}
+
+func showInterfaces(w http.ResponseWriter, r *http.Request) {
+	//fmt.Println("=== interfaces ===")
+	ifaces, _ := net.Interfaces()
+	fmt.Println("net.Interface:", ifaces)
+	for _, iface := range ifaces {
+		flags := iface.Flags.String
+		isUp := strings.Split(flags(), "|")
+		//addrStr0 := split[0]
+		if isUp[0] == "up" && iface.Name != "lo" {
+			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][status:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, isUp[0])
+
+			addrs, _ := iface.Addrs()
+			//addrStr := addrs[0]
+			//fmt.Println("    net.Addr1: ", addrStr.String())
+			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][IP:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, addrs[0])
+			formatMessage(w, "INFO Interface: %s mac:%s IP:%s\n", iface.Name, iface.HardwareAddr, addrs[0])
+
+		}
+
+		//addrs, _ := iface.Addrs()
+	}
 }
 
 //	arraySelfTest.push('wan');

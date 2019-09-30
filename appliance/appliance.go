@@ -116,6 +116,8 @@ func SelfTestIni(w http.ResponseWriter, r *http.Request) {
 	//if (ODO_ == "prod" {
 	///$test = $_POST['x'];
 	///$exec = "sh /usr/bin/selftest.sh $test";
+
+	//showInterfaces()
 }
 
 //func formatMessage(w http.ResponseWriter, message string) string {
@@ -194,6 +196,7 @@ func showUsbs() string {
 	message := string(out[:])
 	return message
 }
+
 
 /* //////////////////////// LIXO //////////////////////////////////////////////////////////////////////
 
