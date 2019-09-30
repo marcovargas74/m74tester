@@ -1,0 +1,8 @@
+Basta editar a variavel $executavel e colocar o path do seu executavel
+o padrao eh "recovery"
+
+a execucao dele sera:
+
+$executavel <path_do_arquivo_enviado> <mac1> <mac2> [flag]
+
+se desejar ver o output do seu programa basta setar a flag $debug para 1, default eh 0

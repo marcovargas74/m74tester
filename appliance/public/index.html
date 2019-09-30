@@ -1,0 +1,136 @@
+<!doctype HTML>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Intelbras | Embarcado</title>
+		<link rel="shortcut icon" href="static/images/favicon.ico"/>
+
+		<script type="text/javascript" language="Javascript" SRC="static/js/jquery-1.6.1.min.js"></script>
+		<script type="text/javascript" language="Javascript" SRC="static/js/functions.js"></script>
+		<style type="text/css">
+			*{
+				margin: 0px;
+				padding: 0px;
+				border: 0px;
+			}
+			body{
+				background-color: #C5D2D6;
+				font-family: 'Arial';
+				color: #446873;
+			}
+			button,
+			input[type='file']{
+				background-color: #446873;
+				border: 1px solid #446873;
+				color: #FFF;
+				padding: 10px 30px;
+			}
+			input[type='file']{
+				padding: 6px 5px !important;
+			}
+			input[type='text']{
+				padding: 5px;
+			}
+			button:hover{
+				background-color: #19232C;
+				border: 1px solid #19232C;
+			}
+			div.centered{
+				margin: 0 auto;
+				width: 800px;
+			}
+			#msg {
+				text-align: center;
+				color: red;
+			}
+			section{
+				padding: 10px;
+				border-bottom: 1px solid;
+			}
+			div{
+				padding: 5px 0px 5px 0px;
+			}
+			.saida{
+				background-color: #333;
+				padding: 0px 0px 0px 10px !important;
+				background-color: #E6E6E6;
+				margin: 10px 0 10px 0;
+			}
+			.titulo{
+				position: absolute;
+				margin: 10px 0px 0px 30px;
+			}
+			.mac{
+				display: inline-block; 
+				width: 33%;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="centered">
+			<section>
+				<img src="static/images/logo_intelbras.svg" style="height: 40px">
+				<span class="titulo">TESTES APPLIANCE Intelbras GO</span>
+			</section>
+
+			<section id="self_test">
+				<div>
+					<label>N&atilde;o executar o auto teste</label> <input id="skipself" type="checkbox"/>
+				</div>
+				<button id="btnself">Iniciar</button>
+				<div class="saida" id="saida1"></div>
+			</section>
+			
+			<section id="envia_firmware" class="hide">
+				<form id="recovery" name="recovery" enctype="multipart/form-data" method="POST" action="envia.php" target="enviar">
+					<div>
+						<label>N&atilde;o executar verifica&ccedil;&atilde;o do boot</label>
+						<input type="checkbox" id="ctz" name="ctz"/>
+					</div>
+					<div>
+						<label>Localize o arquivo de recupera&ccedil;&atilde;o: </label>
+						<input type="file" id="filename" name="filename"/>
+						<button id="btnEnviar" type="submit">Enviar</button>
+						<div class="saida" id="saida2"></div>
+					</div>
+				</form>
+			</section>
+			
+			<section id="grava_mac" class="hide">
+				<div id="gm_busca">
+					<label>Buscar endere&ccedil;o MAC: </label><button id="busca_mac">Buscar</button>
+				</div>
+				<div id="mac_log" class="hide"></div>
+				<div id="gm_grava" class="hide">
+					<form id="frm_mac" name="frm_mac">
+
+						<p>Erro ao buscar endere&ccedil;o MAC, insira manualmente: </p>
+						
+						<div class="mac">
+							<label>MAC LAN : </label>
+							<input type="text" id="mac1" name="mac1" maxlength="17"/>
+						</div>
+						<div id="gm_wan_show" class="mac hide">
+							<label>MAC WAN: </label>
+							<input type="text" id="mac2" name="mac2" maxlength="17"/>
+						</div>
+					
+						<button type="submit">Gravar</button>
+						<div class="saida" id="saida3"></div>
+					</form>
+				</div>
+			</section>
+			
+			<section id="imprimir_mac" class="hide">
+				<div id="gm_imprimir">
+					<button id="imprimir_mac">Imprimir MAC</button>
+				</div>
+			</section>
+			
+			<div id="msg"></div>
+			<div id="swap" class="hide"></div>
+			<iframe id="enviar" name="enviar" style="display: none">Enviar</iframe>
+
+		</div>
+	</body>
+</html>
