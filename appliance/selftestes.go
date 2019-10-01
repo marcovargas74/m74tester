@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os/exec"
 	"strings"
 )
 
@@ -163,70 +164,69 @@ func usbsTest(w http.ResponseWriter, r *http.Request) int {
 
 //	arraySelfTest.push('lan');
 func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
+	//if eth == "eth0" {
+	showInterfaces(w, r)
+	//}
 
-	if eth == "eth0" {
-		showInterfaces(w, r)
-
-	}
-
+	//1. Inicio do teste
 	formatMessage(w, "OK Teste da Interface %s", eth)
 
-	//.
+	//2. Carrega o device drive das Interfaces Eth1,Eth2 e Eth3
+	//insmod /drivers/ks8842.ko typeIs16Bits=1
+	formatMessage(w, "OK Carregando driver Realtek(ETH1,ETH2 e ETH3) ")
+	localScript := serverDirProd + "/scripts/pgload.sh"
+	if Mode == "dev" {
+		localScript = serverDirDev + "/scripts/load.sh"
+	}
+	//_, err := exec.Command("bash", "-c", "./public/scripts/pgload.sh").Output()
+	//_, err := exec.Command("sh /home/iap/appliance/public/scripts/pgload.sh").Output()
+	outsh, err := exec.Command("bash", "-c", "sh "+localScript).Output()
+	if err != nil {
+		formatMessage(w, "ERR Erro ao carregar drivers Realtek [Err:%s]", err)
+		return 1
+	}
+	//}
+	formatMessage(w, "OK Modulo carregado com sucesso! %s", outsh)
 
-	//formatMessage(w, "OK Teste de configuracao da %s", eth)
-	//formatMessage(w, "OK Configurando a interface %s", eth)
+	//3. Verifica se interface esta acessivel
+	//"bash", "-c", "ps cax | grep myapp"
+	//found=`dmesg | grep ks8842 | grep "Found chip" | wc -l`
+	out, err := exec.Command("bash", "-c", "dmesg | grep ks8842 | grep \"Found chip\" | wc -l").Output()
+	if err != nil || out[0] == '0' {
+		formatMessage(w, "ERR Interface Eth nao encontrada ")
+		return 2
+	}
 
-	//	formatMessage(w, "ERR Erro na escrita na memoria RAM")
-	//	formatMessage(w, "OK Teste de escrita na SDRAM ocorreu com sucesso")
-	/*
-		send_message "OK" "Teste da interface WAN "
+	//formatMessage(w, "OK Interface Eth encontrada e acessivel! [out:%s]", out)
+	formatMessage(w, "OK Interface Eth encontrada e acessivel!")
 
-			if [ $TYPE_HARD -eq $TYPE_HARD_ICIP68 ]; then
-				send_message "OK" "Carregando driver WAN 16 bits "
-				insmod /drivers/ks8842.ko typeIs16Bits=1
-			else
-				send_message "OK" "Carregando driver WAN"
-				insmod /drivers/ks8842.ko typeIs16Bits=0
-			fi
+	//4. Teste de configuracao
+	formatMessage(w, "OK Teste de configuracao da Interface Eth!")
+	formatMessage(w, "OK Configurando a interface Eth!")
+	addrIP := "10.0.0.4"
+	netMask := "255.255.255.0"
+	formatMessage(w, "OK Endereco %s Mascara %s Interface Eth!", addrIP, netMask)
 
-			if [ $MODO_TESTE -eq 0 ]; then
-				if [ $? -ne 0 ]; then
-					send_message "ERR" "Erro ao carregar driver"
-					return
-				else
-					send_message "OK" "Modulo carregado com sucesso"
-				fi
+	//command := fmt.Sprintf("ifconfig eth1 %s netmask %s 2> /dev/null > /dev/null", addrIP, netMask)
+	command := fmt.Sprintf("ifconfig 2> /dev/null > /dev/null")
+	_, err = exec.Command("bash", "-c", command).Output()
+	if err != nil {
+		formatMessage(w, "ERR Falha ao configurar Eth [Err:%s]", err)
+		return 3
+	}
 
-				sleep 1
-				found=`dmesg | grep ks8842 | grep "Found chip" | wc -l`
+	testaddrIP := "10.0.0.30"
+	formatMessage(w, "OK Pingando endereco %s!", testaddrIP)
 
-			else
-				send_message "OK" "Modulo carregado com sucesso"
-				sleep 1
-				found=1
-			fi
+	command = fmt.Sprintf("ping -c 3 %s 2> /dev/null > /dev/null", testaddrIP)
+	out, err = exec.Command("bash", "-c", command).Output()
+	if err != nil {
+		formatMessage(w, "WARN Erro ao pingar endereço %s [Err: %s]", testaddrIP, err)
+		return 4
+	}
+	formatMessage(w, "OK PING OK out:%s", out)
 
-			if [ $found -gt 0 ]; then
-				send_message "OK" "Interface wan encontrada e acessivel"
-			else
-				send_message "ERR" "Interface wan nao encontrada"
-				return
-			fi
-
-			send_message "OK" "Teste de configuracao da WAN"
-			send_message "OK" "Configurando a interface WAN"
-			send_message "OK" "Endereco $WAN_IP Mascara 255.255.255.0"
-			ifconfig eth1 $WAN_IP netmask 255.255.255.0 2> /dev/null > /dev/null
-			sleep 1
-			send_message "OK" "Pingando endereco $WAN_TEST_IP"
-			ping -c 3 $WAN_TEST_IP 2> /dev/null > /dev/null
-			if [ $? -eq 0 ]; then
-				send_message "OK" "Ping OK"
-			else
-				send_message "WARN" "Erro ao pingar endereço $WAN_TEST_IP"
-			fi
-	*/
-
+	showInterfaces(w, r)
 	return 0
 }
 

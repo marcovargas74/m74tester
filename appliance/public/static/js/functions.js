@@ -417,10 +417,10 @@ function set_test_appliance()
 	//arraySelfTest.push('flash');
 	//arraySelfTest.push('codecs');
 	arraySelfTest.push('usb');
-	arraySelfTest.push('eth0');
-	arraySelfTest.push('eth1');
-	arraySelfTest.push('eth2');
-	arraySelfTest.push('eth3');
+	arraySelfTest.push('eths');
+	//arraySelfTest.push('eth1');
+	//arraySelfTest.push('eth2');
+	//arraySelfTest.push('eth3');
 //	arraySelfTest.push('wan');
 }
 
