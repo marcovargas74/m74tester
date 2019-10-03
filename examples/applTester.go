@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"log/syslog"
+	"os"
 	"time"
 
-	"github.com/marcovargas74/m74tester/appliance"
+	appl "github.com/marcovargas74/m74tester/appliance"
 	rlog "github.com/marcovargas74/rLog"
 )
 
@@ -24,25 +25,13 @@ type Ttester struct {
 	PidMain           int
 	PidRemoteSocket   int
 	LOOPMain          bool
-	//KillApplication   bool
-	//Suporta
-	//ServerHTTP bool
-	//ServerDir  string
-	//ServerPort string
-
-	//Suporta Appliance
-	//IsAppliance bool
-	//ServerDir  string
-	//ServerPort string
-
-	//Suporta Menu
-	//MenuEnable bool
 }
 
 //TesterCtrl Variaveis Globais usados em todo o Tester
 var TesterCtrl Ttester
 
 func init() {
+	var err error
 	dt := time.Now()
 	TesterCtrl.VersionSoftware = dt.Format("2006-01-02")
 	//Configuracao do LOG
@@ -52,26 +41,13 @@ func init() {
 	TesterCtrl.LogProgLevel = rlog.Debug | rlog.Local4
 	TesterCtrl.LogProgIP = "172.31.11.162:514"
 
-	//Configuração do Servidor HTTP
-	//AppCtrl.ServerHTTP = false
-	//AppCtrl.ServerDir = "appliance/public"
-	//AppCtrl.ServerDir = "public"
-	//AppCtrl.ServerDir = "public/appPage"
-	//AppCtrl.ServerPort = ":8080"
-
-	//Ativa Menu com opcoes
-	//AppCtrl.MenuEnable = false
-
-	//Ativa pacote do appliance
-	//AppCtrl.IsAppliance = true
+	appl.WorkDir, err = os.Getwd()
+	appl.CheckErr(err)
 
 	rlog.Clear()
 	rlog.StartLogger(TesterCtrl.LogProgEnable, TesterCtrl.LogProgLevel, TesterCtrl.LogProgIP)
 	rlog.SetPrintLocal(TesterCtrl.LogProgPrintLocal)
 	rlog.AppSyslog(syslog.LOG_INFO, "%s ======== Start Mannager App Version %s\n", rlog.ThisFunction(), TesterCtrl.VersionSoftware)
-
-	//ret := appliance.execLinuxCmd("users")
-	//fmt.Printf("return: %s\n", ret)
 
 }
 
@@ -101,7 +77,7 @@ func main() {
 	rlog.AppSyslog(syslog.LOG_INFO, "%s {START LOOP_MAIN!!!}\n", rlog.ThisFunction())
 
 	//Iniciar Pacote do Appliance
-	go appliance.StartAppliance(appliance.GetMode())
+	go appl.StartAppliance(appl.GetMode())
 
 	for {
 		executaTimerControl(&countLOOP, &count1MIN)

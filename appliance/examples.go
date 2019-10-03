@@ -1,5 +1,13 @@
 package appliance
 
+/*
+Onformacoes diversas
+sudo visudo
+and add the following line to the sudoers list
+
+username ALL = NOPASSWD : ALL
+
+*/
 import (
 	"fmt"
 	"io/ioutil"
@@ -7,6 +15,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
@@ -353,4 +362,77 @@ func showUsbs() {
 		_ = dev
 	}
 }
+*/
+
+//Benchmark _test.go
+func Benchmark() error {
+
+	/*func (self *Server) start() error {
+		if self.p != nil {
+		return fmt.Errorf("Server is already running with pid %d", self.p.Pid)
+	}*/
+
+	fmt.Println("Starting server")
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Dir: ", dir)
+
+	//root := filepath.Join(dir, "..", "..")
+	root := filepath.Join(dir, "..", "..", "..", "..", "..", "..", "Lixo")
+	fmt.Println("root: ", root)
+	filename := filepath.Join(root, "server")
+	fmt.Println("filename: ", root)
+	p, err := os.StartProcess(filename, []string{filename, "-cpuprofile", "/tmp/cpuprofile"}, &os.ProcAttr{
+		Dir:   root,
+		Env:   os.Environ(),
+		Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+	})
+	if err != nil {
+		return err
+	}
+	//self.p = p
+	fmt.Printf("Processo: %v", p)
+	time.Sleep(2 * time.Second)
+	return nil
+}
+
+/*
+func tryRunServer() error {
+	//path := get_executable_filename()
+	//args := []string{os.Args[0], "-s", "-sock", *g_sock, "-addr", *g_addr}
+	cwd, _ := os.Getwd()
+
+	var err error
+	stdin, err := os.Open(os.DevNull)
+	if err != nil {
+		return err
+	}
+	stdout, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
+	if err != nil {
+		return err
+	}
+	stderr, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
+	if err != nil {
+		return err
+	}
+
+	/*
+	procattr := os.ProcAttr{Dir: cwd, Env: os.Environ(), Files: []*os.File{stdin, stdout, stderr}}
+	p, err := os.StartProcess(path, args, &procattr)
+	if err != nil {
+		return err
+	}* /
+
+	return p.Release()
+}
+
+
+
+	//home := execLinuxCmd("users")
+	/*if home := os.Getenv("HOME"); home != "" {
+		fmt.Println("home:", home)
+	}* /
+//home, err := exec.Command("users").Output()
 */

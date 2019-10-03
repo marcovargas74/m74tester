@@ -14,19 +14,22 @@ import (
 )
 
 const (
-	serverDirDev  = "/home/intelbras/projetos-go/src/github.com/marcovargas74/m74tester/appliance/public"
-	serverDirProd = "/home/iap/appliance/public"
-	serverPort    = ":8080"
+	//serverDirDev  = "/home/intelbras/projetos-go/src/github.com/marcovargas74/m74tester/appliance/public"
+	//serverDirProd = "/home/iap/appliance/public"
+	serverPort = ":8080"
 	//mode          = "prod"
 	//mode             = "dev"
 
 	//fileHardConfDev  = "/home/intelbras/projetos-go/src/github.com/marcovargas74/m74tester/appliance/public/static/hard.conf"
-	fileHardConfDev  = serverDirDev + "/static/hard.conf"
-	fileHardConfProd = serverDirProd + "/static/hard.conf"
+	//fileHardConfDev  = serverDirDev + "/static/hard.conf"
+	//fileHardConfProd = serverDirProd + "/static/hard.conf"
 )
 
 //Mode é o modo do teste se "prod" ou "dev"
 var Mode = "prod"
+
+//WorkDir é o diretorio de trabalho vai ser diferenta pra Dev ou Prod
+var WorkDir string
 
 //StartAppliance inicia o servidor http do appliance
 func StartAppliance(modo string) {
@@ -35,10 +38,8 @@ func StartAppliance(modo string) {
 		Mode = modo
 	}
 
-	serverDir := serverDirProd
-	if Mode == "dev" {
-		serverDir = serverDirDev
-	}
+	serverDir := WorkDir + "/public"
+	//fmt.Println("serverDir: ", serverDir)
 
 	server := http.FileServer(http.Dir(serverDir))
 	http.Handle("/", server)
@@ -65,26 +66,20 @@ func HandleFuncions() {
 
 //ReadFile Le arquivo
 func ReadFile(w http.ResponseWriter, r *http.Request) {
-	filename := r.FormValue("nomeArquivo")
-	//filename := title + ".txt"
-	//filename = "title"
+	//filename := r.FormValue("nomeArquivo")
 	//Nao da bola para o dado que vem do js
-	filename = fileHardConfProd
-	if Mode == "dev" {
-		filename = fileHardConfDev
-	}
+	filename := WorkDir + "/public/static/hard.conf"
 
 	body, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Println("ReadFile: ", filename, "Err:", err)
-		//return nil
 		formatMessage(w, "ERR Erro ao abrir Arquivo de configuracao")
 		return
 	}
 
 	fmt.Fprintf(w, "%s", body)
-	fmt.Println("ReadFile: ", filename)
-	fmt.Println("Body: ", string(body))
+	//fmt.Println("ReadFile: ", filename)
+	//fmt.Println("Body: ", string(body))
 	//fmt.Fprintf(w, "<resposta>0</resposta>")
 }
 
@@ -99,9 +94,7 @@ func SelfTestIni(w http.ResponseWriter, r *http.Request) {
 	erro := 0
 	testName := "config"
 	if Mode == "dev" {
-		//$test = $_POST['x'];
 		testName = "hardware"
-		//exec := "sh /home/intelbras/ICIP/Firmwares/Scripts/selftest.sh $test";
 	}
 
 	//HoraCerta(w, r)
@@ -160,7 +153,8 @@ func formatMessage(w http.ResponseWriter, format string, a ...interface{}) {
 
 }
 
-func check(e error) {
+//CheckErr chech if have err and print a log default
+func CheckErr(e error) {
 	if e != nil {
 		log.Fatal(e)
 		//panic(e)
@@ -169,34 +163,21 @@ func check(e error) {
 
 //GetMode return the type of teste development or production
 func GetMode() string {
-	//home := execLinuxCmd("users")
-	/*if home := os.Getenv("HOME"); home != "" {
-		fmt.Println("home:", home)
-	}*/
-	//home, err := exec.Command("users").Output()
-
-	home, err := os.UserHomeDir()
-	check(err)
-	fmt.Println("home:", home)
-	//if strings.Contains(string(execLinuxCmd("users")[:]), "intelbras") {
+	home, err := os.UserHomeDir() //dir, _ := os.Getwd()
+	CheckErr(err)
+	//fmt.Println("home:", home)
 	if strings.Contains(home, "intelbras") {
-		//fmt.Println("dev")
 		return "dev"
 	}
-
-	//fmt.Println("modo is prod")
 	return "prod"
 }
 
 func showUsbs() string {
-
 	out, err := exec.Command("lsusb").Output()
-	check(err)
-	//out := execLinuxCmd("lsusb")
+	CheckErr(err)
 	message := string(out[:])
 	return message
 }
-
 
 /* //////////////////////// LIXO //////////////////////////////////////////////////////////////////////
 

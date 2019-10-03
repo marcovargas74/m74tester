@@ -162,6 +162,99 @@ func usbsTest(w http.ResponseWriter, r *http.Request) int {
 	return 0
 }
 
+/*
+
+ */
+func initDriversRealtek(localScript string) error {
+	if Mode == "dev" {
+		return nil
+	}
+
+	//passw := echo 'intelbras' | sudo -kS
+	/*res, err := exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS").Output()
+	if err == nil {
+		fmt.Println("sudo ok ")
+	}
+	fmt.Println(string(res))
+	* /
+
+	out, err := exec.Command("bash", "-c", "cd "+localScript).Output()
+	if err == nil {
+		fmt.Println("cd ok ", out)
+	}
+	/*
+	out, err = exec.Command("bash", "-c", "pwd").Output()
+	if err == nil {
+		fmt.Printf("pwd ok %v", out)
+	}*/
+
+	//home, err := os.StartProcess().FindProcess.Args().UserHomeDir()
+	//check(err)
+	//fmt.Println("home:", home)
+	//fmt.Println("local: ", localScript)
+	//dir, _ := os.Getwd()
+	//fmt.Println("Dir: ", dir)
+
+	//rmmod r8169
+	_, err := exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS rmmod r8169").Output()
+	if err == nil {
+		fmt.Println("r8169 OK ")
+	}
+
+	//rmmod r8168
+	_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  rmmod r8168").Output()
+	if err == nil {
+		fmt.Println("r8168 OK ")
+	}
+
+	//rmmod r8101
+	_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  rmmod r8101").Output()
+	if err == nil {
+		fmt.Println("r8101 OK ")
+	}
+
+	//rmmod pgdrv
+	_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  rmmod pgdrv").Output()
+	if err == nil {
+		fmt.Println("pgdrv OK ")
+	}
+
+	/*//# make clean all
+	_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  make clean all").Output()
+	if err != nil {
+		fmt.Println("clean: ", err)
+	}*/
+
+	cmd := exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  make clean all")
+	cmd.Dir = localScript //dir, _ := os.Getwd()
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("clean: ", err)
+		return err
+	}
+	//fmt.Println("Clen OK")
+
+	//Step 2: Build the pgdrv.ko and install it.
+	//# make clean all
+	/*_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS insmod pgdrv.ko").Output()
+	if err != nil {
+		fmt.Println("pgdrv.ko: ", err)
+		return err
+	}*/
+	//fmt.Println(out)
+	cmd = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  insmod pgdrv.ko")
+	cmd.Dir = localScript
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("insmod: ", err)
+		return err
+	}
+
+	fmt.Println("insmod pgdrv OK")
+	return nil
+
+}
+
 //	arraySelfTest.push('lan');
 func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	//if eth == "eth0" {
@@ -172,21 +265,16 @@ func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	formatMessage(w, "OK Teste da Interface %s", eth)
 
 	//2. Carrega o device drive das Interfaces Eth1,Eth2 e Eth3
-	//insmod /drivers/ks8842.ko typeIs16Bits=1
 	formatMessage(w, "OK Carregando driver Realtek(ETH1,ETH2 e ETH3) ")
-	localScript := serverDirProd + "/scripts/pgload.sh"
-	if Mode == "dev" {
-		localScript = serverDirDev + "/scripts/load.sh"
-	}
-	//_, err := exec.Command("bash", "-c", "./public/scripts/pgload.sh").Output()
-	//_, err := exec.Command("sh /home/iap/appliance/public/scripts/pgload.sh").Output()
-	outsh, err := exec.Command("bash", "-c", "sh "+localScript).Output()
+	localScript := WorkDir + "/public/linuxpg/"
+	err := initDriversRealtek(localScript)
 	if err != nil {
 		formatMessage(w, "ERR Erro ao carregar drivers Realtek [Err:%s]", err)
 		return 1
 	}
-	//}
-	formatMessage(w, "OK Modulo carregado com sucesso! %s", outsh)
+	formatMessage(w, "OK Modulo carregado com sucesso! ")
+
+	//----TODO Ate aqui OK
 
 	//3. Verifica se interface esta acessivel
 	//"bash", "-c", "ps cax | grep myapp"
@@ -253,8 +341,6 @@ func showInterfaces(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//	arraySelfTest.push('wan');
-
 //SelfTest Menu principal que chama os testes espeficicos
 func SelfTest(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -262,12 +348,6 @@ func SelfTest(w http.ResponseWriter, r *http.Request) {
 
 	erro := 0
 	testName := r.FormValue("param")
-	/*if mode == "dev" {
-		//$test = $_POST['x'];
-		testName = "hardware"
-		//exec := "sh /home/intelbras/ICIP/Firmwares/Scripts/selftest.sh $test";
-	}*/
-
 	fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>INFO Teste de %s</font></valor>", testName)
 
 	switch testName {
@@ -288,41 +368,11 @@ func SelfTest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("four")
 	}
 
-	/*
-		if testName == "memoria" {
-			erro = memoryTest(w, r)
-		}
-
-		if testName == "flash" {
-			erro = flahMemoryTest(w, r)
-		}
-
-		if testName == "codecs" {
-			erro = boardTest(w, r)
-		}
-
-		//	arraySelfTest.push('usb');
-		if testName == "usb" {
-			erro = usbsTest(w, r)
-		}
-	*/
-	//	arraySelfTest.push('lan');
-
 	if strings.Contains(testName, "eth") {
 		erro = ethInterfacesTest(w, r, testName)
 	}
 
-	/*
-		if erro != 0 {
-			fmt.Fprintf(w, "<resposta>1</resposta>")
-		} else {
-			fmt.Fprintf(w, "<resposta>0</resposta>")
-		}*/
-
 	fmt.Println("SelfTest ", testName, "ERRO: ", erro)
-	//if (ODO_ == "prod" {
-	///$test = $_POST['x'];
-	///$exec = "sh /usr/bin/selftest.sh $test";
 }
 
 /* MATERIAL DE APOIO
