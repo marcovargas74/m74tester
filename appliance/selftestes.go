@@ -159,6 +159,7 @@ func usbsTest(w http.ResponseWriter, r *http.Request) int {
 	//else
 	//fi
 
+	formatMessage(w, "Aguarde....")
 	return 0
 }
 
@@ -200,7 +201,7 @@ func initDriversRealtek(localScript string) error {
 	if err == nil {
 		fmt.Println("r8169 OK ")
 	}
-    
+
 	//rmmod r8168
 	_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  rmmod r8168").Output()
 	if err == nil {
@@ -275,47 +276,75 @@ func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	}
 	formatMessage(w, "OK Modulo carregado com sucesso! ")
 
-	//----TODO Ate aqui OK
+	//-21/10 ---Testar no Apliance TODO TESTAR no APPLIANCE
 
 	//3. Verifica se interface esta acessivel
 	//"bash", "-c", "ps cax | grep myapp"
 	//found=`dmesg | grep ks8842 | grep "Found chip" | wc -l`
-	out, err := exec.Command("bash", "-c", "dmesg | grep ks8842 | grep \"Found chip\" | wc -l").Output()
+
+	//Dmesg copiado do Iap
+	//2.728952] igb 0000:04:00.0: Intel(R) Gigabit Ethernet Network Connection
+	// 2.728955] igb 0000:04:00.0: eth0: (PCIe:2.5Gb/s:Width x1) 00:90:fb:60:e1:63
+	// 2.728998] igb 0000:04:00.0: eth0: PBA No: 000300-000
+	// 2.729001] igb 0000:04:00.0: Using MSI-X interrupts. 4 rx queue(s), 4 tx queue(s)
+	// 2.749803] igb 0000:04:00.0 enp4s0: renamed from eth0
+	//os.
+
+	//findDriver := `dmesg | grep pgdrv | grep "Found chip" | wc -l`
+
+	findDriver := `dmesg | grep Gigabit | wc -l`
+	if Mode == "dev" {
+		findDriver = `dmesg | grep r8169 | grep "link up" | wc -l`
+	}
+	//out, err := exec.Command("bash", "-c", "dmesg | grep pgdrv | grep \"Found chip\" | wc -l").Output()
+	out, err := exec.Command("bash", "-c", findDriver).Output()
 	if err != nil || out[0] == '0' {
-		formatMessage(w, "ERR Interface Eth nao encontrada ")
+		formatMessage(w, "ERR Interface Eth nao encontrada [Err:%s] ", err)
 		return 2
 	}
 
 	//formatMessage(w, "OK Interface Eth encontrada e acessivel! [out:%s]", out)
 	formatMessage(w, "OK Interface Eth encontrada e acessivel!")
 
+	//
 	//4. Teste de configuracao
 	formatMessage(w, "OK Teste de configuracao da Interface Eth!")
 	formatMessage(w, "OK Configurando a interface Eth!")
+
+	//TODO Desenvolvendo aqui !
+	eth = "enp4s0" //"eth0"
 	addrIP := "10.0.0.4"
 	netMask := "255.255.255.0"
 	formatMessage(w, "OK Endereco %s Mascara %s Interface Eth!", addrIP, netMask)
 
-	//command := fmt.Sprintf("ifconfig eth1 %s netmask %s 2> /dev/null > /dev/null", addrIP, netMask)
-	command := fmt.Sprintf("ifconfig 2> /dev/null > /dev/null")
-	_, err = exec.Command("bash", "-c", command).Output()
-	if err != nil {
-		formatMessage(w, "ERR Falha ao configurar Eth [Err:%s]", err)
-		return 3
+	//Verifica se ja nao esta programdo
+	command := fmt.Sprintf("ip addr show dev %s | grep %s | wc -l", eth, addrIP)
+	out, err = exec.Command("bash", "-c", findDriver).Output()
+	if err != nil || out[0] == '0' { //Se nao estiver programado programa
+		//command := fmt.Sprintf("ifconfig eth1 %s netmask %s 2> /dev/null > /dev/null", addrIP, netMask)
+		command := fmt.Sprintf("echo 'intelbras' | sudo -kS  ip addr add %s/%s dev %s 2> /dev/null > /dev/null", addrIP, netMask, eth)
+		if Mode == "dev" {
+			command = fmt.Sprintf("ifconfig 2> /dev/null > /dev/null")
+		}
+
+		_, err = exec.Command("bash", "-c", command).Output()
+		if err != nil {
+			formatMessage(w, "ERR Falha ao configurar Eth [Err:%s]", err)
+			return 3
+		}
 	}
 
 	testaddrIP := "10.0.0.30"
 	formatMessage(w, "OK Pingando endereco %s!", testaddrIP)
-
 	command = fmt.Sprintf("ping -c 3 %s 2> /dev/null > /dev/null", testaddrIP)
-	out, err = exec.Command("bash", "-c", command).Output()
+	_, err = exec.Command("bash", "-c", command).Output()
 	if err != nil {
 		formatMessage(w, "WARN Erro ao pingar endereço %s [Err: %s]", testaddrIP, err)
 		return 4
 	}
-	formatMessage(w, "OK PING OK out:%s", out)
+	formatMessage(w, "OK PING OK ")
 
-	showInterfaces(w, r)
+	//showInterfaces(w, r)
 	return 0
 }
 
@@ -323,7 +352,7 @@ func showInterfaces(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println("=== interfaces ===")
 	ifaces, _ := net.Interfaces()
 	fmt.Println("net.Interface:", ifaces)
-	for _, iface := range ifaces {
+	for index, iface := range ifaces {
 		flags := iface.Flags.String
 		isUp := strings.Split(flags(), "|")
 		//addrStr0 := split[0]
@@ -334,7 +363,7 @@ func showInterfaces(w http.ResponseWriter, r *http.Request) {
 			//addrStr := addrs[0]
 			//fmt.Println("    net.Addr1: ", addrStr.String())
 			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][IP:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, addrs[0])
-			formatMessage(w, "INFO Interface: %s mac:%s IP:%s\n", iface.Name, iface.HardwareAddr, addrs[0])
+			formatMessage(w, "INFO Interface %d: %s mac:%s IP:%s\n", index, iface.Name, iface.HardwareAddr, addrs[0])
 
 		}
 

@@ -39,7 +39,7 @@ func StartAppliance(modo string) {
 	}
 
 	serverDir := WorkDir + "/public"
-	//fmt.Println("serverDir: ", serverDir)
+	fmt.Println("serverDir: ", serverDir)
 
 	server := http.FileServer(http.Dir(serverDir))
 	http.Handle("/", server)
