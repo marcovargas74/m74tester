@@ -200,7 +200,7 @@ func initDriversRealtek(localScript string) error {
 	if err == nil {
 		fmt.Println("r8169 OK ")
 	}
-
+    
 	//rmmod r8168
 	_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS  rmmod r8168").Output()
 	if err == nil {
@@ -233,7 +233,7 @@ func initDriversRealtek(localScript string) error {
 		return err
 	}
 	//fmt.Println("Clen OK")
-
+	defer cmd.Process.Kill()
 	//Step 2: Build the pgdrv.ko and install it.
 	//# make clean all
 	/*_, err = exec.Command("bash", "-c", "echo 'intelbras' | sudo -kS insmod pgdrv.ko").Output()
@@ -249,6 +249,7 @@ func initDriversRealtek(localScript string) error {
 		fmt.Println("insmod: ", err)
 		return err
 	}
+	defer cmd.Process.Kill()
 
 	fmt.Println("insmod pgdrv OK")
 	return nil
