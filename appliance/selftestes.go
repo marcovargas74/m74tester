@@ -257,14 +257,39 @@ func initDriversRealtek(localScript string) error {
 
 }
 
+func showInterfaces(w http.ResponseWriter, r *http.Request) {
+	//fmt.Println("=== interfaces ===")
+	ifaces, _ := net.Interfaces()
+	fmt.Println("net.Interface:", ifaces)
+	for index, iface := range ifaces {
+		flags := iface.Flags.String
+		isUp := strings.Split(flags(), "|")
+		//addrStr0 := split[0]
+		if isUp[0] == "up" && iface.Name != "lo" {
+			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][status:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, isUp[0])
+
+			addrs, _ := iface.Addrs()
+			//addrStr := addrs[0]
+			//fmt.Println("    net.Addr1: ", addrStr.String())
+			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][IP:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, addrs[0])
+			formatMessage(w, "INFO Interface %d: %s mac:%s IP:%s\n", index, iface.Name, iface.HardwareAddr, addrs[0])
+
+		}
+
+		//addrs, _ := iface.Addrs()
+	}
+}
+
 //	arraySelfTest.push('lan');
 func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	//if eth == "eth0" {
 	showInterfaces(w, r)
-	//}
+
+	numErro := 0
+	addrIPToPing := "10.0.0.30"
 
 	//1. Inicio do teste
-	formatMessage(w, "OK Teste da Interface %s", eth)
+	//formatMessage(w, "OK Teste da Interface %s", eth)
 
 	//2. Carrega o device drive das Interfaces Eth1,Eth2 e Eth3
 	formatMessage(w, "OK Carregando driver Realtek(ETH1,ETH2 e ETH3) ")
@@ -291,12 +316,12 @@ func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	//os.
 
 	//findDriver := `dmesg | grep pgdrv | grep "Found chip" | wc -l`
-
+	//out, err := exec.Command("bash", "-c", "dmesg | grep pgdrv | grep \"Found chip\" | wc -l").Output()
 	findDriver := `dmesg | grep Gigabit | wc -l`
 	if Mode == "dev" {
 		findDriver = `dmesg | grep r8169 | grep "link up" | wc -l`
 	}
-	//out, err := exec.Command("bash", "-c", "dmesg | grep pgdrv | grep \"Found chip\" | wc -l").Output()
+
 	out, err := exec.Command("bash", "-c", findDriver).Output()
 	if err != nil || out[0] == '0' {
 		formatMessage(w, "ERR Interface Eth nao encontrada [Err:%s] ", err)
@@ -304,71 +329,89 @@ func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	}
 
 	//formatMessage(w, "OK Interface Eth encontrada e acessivel! [out:%s]", out)
-	formatMessage(w, "OK Interface Eth encontrada e acessivel!")
+	formatMessage(w, "OK Interfaces Eths encontrada e acessivel!")
+	for index := 0; index <= 3; index++ {
+		//4. Teste de configuracao
+		//formatMessage(w, "OK Teste de configuracao da Interface Eth!")
+		formatMessage(w, "OK Configurando a interface Eth%d!", index)
 
-	//
-	//4. Teste de configuracao
-	formatMessage(w, "OK Teste de configuracao da Interface Eth!")
-	formatMessage(w, "OK Configurando a interface Eth!")
+		//TODO Desenvolvendo aqui !
+		//eth = "enp4s0"                               //"eth0"
+		eth = fmt.Sprintf("eth%d ", index)
+		addrIP := fmt.Sprintf("10.0.0.%d ", index+4) //addrIP := "10.0.0.4"
+		netMask := "255.255.255.0"
+		formatMessage(w, "OK Endereco %s Mascara %s Interface %s!", addrIP, netMask, eth)
 
-	//TODO Desenvolvendo aqui !
-	eth = "enp4s0" //"eth0"
-	addrIP := "10.0.0.4"
-	netMask := "255.255.255.0"
-	formatMessage(w, "OK Endereco %s Mascara %s Interface Eth!", addrIP, netMask)
+		//Verifica se ja nao esta programdo
+		command := fmt.Sprintf("ip addr show dev %s | grep %s | wc -l", eth, addrIP)
+		out, err = exec.Command("bash", "-c", command).Output()
+		if err != nil || out[0] == '0' { //Se nao estiver programado programa
+			command := fmt.Sprintf("echo 'intelbras' | sudo -kS  ip addr add %s/%s dev %s 2> /dev/null > /dev/null", addrIP, netMask, eth)
+			if Mode == "dev" {
+				command = fmt.Sprintf("ifconfig 2> /dev/null > /dev/null")
+			}
 
-	//Verifica se ja nao esta programdo
-	command := fmt.Sprintf("ip addr show dev %s | grep %s | wc -l", eth, addrIP)
-	out, err = exec.Command("bash", "-c", findDriver).Output()
-	if err != nil || out[0] == '0' { //Se nao estiver programado programa
-		//command := fmt.Sprintf("ifconfig eth1 %s netmask %s 2> /dev/null > /dev/null", addrIP, netMask)
-		command := fmt.Sprintf("echo 'intelbras' | sudo -kS  ip addr add %s/%s dev %s 2> /dev/null > /dev/null", addrIP, netMask, eth)
-		if Mode == "dev" {
-			command = fmt.Sprintf("ifconfig 2> /dev/null > /dev/null")
+			_, err = exec.Command("bash", "-c", command).Output()
+			if err != nil {
+				formatMessage(w, "ERR Falha ao configurar Eth%d [Err:%s]", index, err)
+				numErro++
+				continue //return 3
+			}
 		}
 
+		formatMessage(w, "OK eth%d Pingando endereco %s!", index, addrIPToPing)
+		command = fmt.Sprintf("ping -c 3 %s 2> /dev/null > /dev/null", addrIPToPing)
 		_, err = exec.Command("bash", "-c", command).Output()
 		if err != nil {
-			formatMessage(w, "ERR Falha ao configurar Eth [Err:%s]", err)
-			return 3
+			formatMessage(w, "WARN Erro da Eth%d ao pingar endereço %s [Err: %s]", index, addrIPToPing, err)
+			numErro++
+			continue //return 4
 		}
+		formatMessage(w, "OK PING OK da Eth%d", index)
+
 	}
 
-	testaddrIP := "10.0.0.30"
-	formatMessage(w, "OK Pingando endereco %s!", testaddrIP)
-	command = fmt.Sprintf("ping -c 3 %s 2> /dev/null > /dev/null", testaddrIP)
-	_, err = exec.Command("bash", "-c", command).Output()
-	if err != nil {
-		formatMessage(w, "WARN Erro ao pingar endereço %s [Err: %s]", testaddrIP, err)
-		return 4
+	if numErro != 0 {
+		formatMessage(w, "ERR Falha ao Testar as interfaces de REDE")
+		return numErro
 	}
-	formatMessage(w, "OK PING OK ")
 
+	formatMessage(w, "OK Todas as Interfaces Eths Testadas com Sucesso!")
 	//showInterfaces(w, r)
 	return 0
 }
 
-func showInterfaces(w http.ResponseWriter, r *http.Request) {
-	//fmt.Println("=== interfaces ===")
-	ifaces, _ := net.Interfaces()
-	fmt.Println("net.Interface:", ifaces)
-	for index, iface := range ifaces {
-		flags := iface.Flags.String
-		isUp := strings.Split(flags(), "|")
-		//addrStr0 := split[0]
-		if isUp[0] == "up" && iface.Name != "lo" {
-			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][status:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, isUp[0])
+//	arraySelfTest.push('lan');
+func ssdTest(w http.ResponseWriter, r *http.Request) int {
 
-			addrs, _ := iface.Addrs()
-			//addrStr := addrs[0]
-			//fmt.Println("    net.Addr1: ", addrStr.String())
-			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][IP:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, addrs[0])
-			formatMessage(w, "INFO Interface %d: %s mac:%s IP:%s\n", index, iface.Name, iface.HardwareAddr, addrs[0])
+	for index := 1; index <= 2; index++ {
+		//1. Inicio do teste
+		//formatMessage(w, "OK Teste do SSD_%d", index)
 
+		//findssd := `dmesg | grep SATA | grep ata1 | grep link`
+		findssd := fmt.Sprintf(`dmesg | grep SATA | grep ata%d | grep link`, index)
+		/*if Mode == "dev" {
+			findDriver = `dmesg | grep r8169 | grep "link up" | wc -l`
+		}*/
+
+		out, err := exec.Command("bash", "-c", findssd).Output()
+		if err != nil || out[0] == '0' {
+			formatMessage(w, "ERR SSD_%d nao encontrado Err:[driver down] ", index)
+			return 2
 		}
 
-		//addrs, _ := iface.Addrs()
+		//if string(out) == "link up" {
+		//fmt.Printf("out ssd: %s", string(out))
+		if !strings.Contains(string(out), "link up") {
+			formatMessage(w, "ERR SSD_%d nao encontrado Err:[link down]", index)
+			return 2
+		}
+
+		formatMessage(w, "OK SSD_%d encontrado e acessivel! ", index)
+
 	}
+
+	return 0
 }
 
 //SelfTest Menu principal que chama os testes espeficicos
@@ -396,6 +439,10 @@ func SelfTest(w http.ResponseWriter, r *http.Request) {
 	case "usb":
 		erro = usbsTest(w, r)
 		fmt.Println("four")
+
+	case "ssd":
+		erro = ssdTest(w, r)
+		fmt.Println("five")
 	}
 
 	if strings.Contains(testName, "eth") {

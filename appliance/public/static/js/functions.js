@@ -422,6 +422,8 @@ function set_test_appliance()
 	//arraySelfTest.push('eth2');
 	//arraySelfTest.push('eth3');
 //	arraySelfTest.push('wan');
+	arraySelfTest.push('ssd');
+
 }
 
 function set_test_unniti()
