@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+const (
+	_addrIPToPing  = "10.0.0.30"
+	_numInterfaces = 4
+)
+
 func memoryTest(w http.ResponseWriter, r *http.Request) int {
 	formatMessage(w, "OK Inicio dos testes de memoria RAM")
 	formatMessage(w, "OK Teste de escrita na SDRAM")
@@ -257,15 +262,16 @@ func initDriversRealtek(localScript string) error {
 
 }
 
-func showInterfaces(w http.ResponseWriter, r *http.Request) {
+func showInterfaces(w http.ResponseWriter, r *http.Request, pIfaces *[]net.Interface) {
 	//fmt.Println("=== interfaces ===")
 	ifaces, _ := net.Interfaces()
-	fmt.Println("net.Interface:", ifaces)
+	//Ifaces = ifaces
 	for index, iface := range ifaces {
 		flags := iface.Flags.String
 		isUp := strings.Split(flags(), "|")
 		//addrStr0 := split[0]
 		if isUp[0] == "up" && iface.Name != "lo" {
+			*pIfaces = append(*pIfaces, iface)
 			//fmt.Printf("[%d]Interface:[name:%s][mac:%s][status:%s]\n", iface.Index, iface.Name, iface.HardwareAddr, isUp[0])
 
 			addrs, _ := iface.Addrs()
@@ -278,16 +284,42 @@ func showInterfaces(w http.ResponseWriter, r *http.Request) {
 
 		//addrs, _ := iface.Addrs()
 	}
+	fmt.Println("show net.Interface:", *pIfaces, len(*pIfaces))
+
+}
+
+func configEth(w http.ResponseWriter, index int, iface net.Interface) error {
+	//4. Teste de configuracao
+	//formatMessage(w, "OK Teste de configuracao da Interface Eth!")
+	//eth := iface.Name
+	addrIP := fmt.Sprintf("10.0.0.%d", index+4)
+	formatMessage(w, "OK Configurando a interface %s com o IP %s", iface.Name, addrIP)
+
+	//Verifica se ja nao esta programdo
+	command := fmt.Sprintf("ip addr show dev %s | grep %s | wc -l", iface.Name, addrIP)
+	out, err := exec.Command("bash", "-c", command).Output()
+	if err != nil || out[0] == '0' { //Se nao estiver programado programa
+		command := fmt.Sprintf(`echo 'intelbras' | sudo -kS  ip addr add %s/24 dev %s 2> /dev/null > /dev/null`, addrIP, iface.Name)
+		if Mode == "dev" {
+			command = fmt.Sprintf("ifconfig 2> /dev/null > /dev/null")
+		}
+
+		_, err = exec.Command("bash", "-c", command).Output()
+		if err != nil {
+			formatMessage(w, "ERR Falha ao configurar Eth%d [Err:%s]", index, err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 //	arraySelfTest.push('lan');
 func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 	//if eth == "eth0" {
-	showInterfaces(w, r)
+	//fmt.Println("eth net.Interface:", Ifaces)
 
 	numErro := 0
-	addrIPToPing := "10.0.0.30"
-
 	//1. Inicio do teste
 	//formatMessage(w, "OK Teste da Interface %s", eth)
 
@@ -300,6 +332,7 @@ func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 		return 1
 	}
 	formatMessage(w, "OK Modulo carregado com sucesso! ")
+	showInterfaces(w, r, &Ifaces)
 
 	//-21/10 ---Testar no Apliance TODO TESTAR no APPLIANCE
 
@@ -330,49 +363,33 @@ func ethInterfacesTest(w http.ResponseWriter, r *http.Request, eth string) int {
 
 	//formatMessage(w, "OK Interface Eth encontrada e acessivel! [out:%s]", out)
 	formatMessage(w, "OK Interfaces Eths encontrada e acessivel!")
-	for index := 0; index <= 3; index++ {
-		//4. Teste de configuracao
-		//formatMessage(w, "OK Teste de configuracao da Interface Eth!")
-		formatMessage(w, "OK Configurando a interface Eth%d!", index)
 
-		//TODO Desenvolvendo aqui !
-		//eth = "enp4s0"                               //"eth0"
-		eth = fmt.Sprintf("eth%d ", index)
-		addrIP := fmt.Sprintf("10.0.0.%d ", index+4) //addrIP := "10.0.0.4"
-		netMask := "255.255.255.0"
-		formatMessage(w, "OK Endereco %s Mascara %s Interface %s!", addrIP, netMask, eth)
-
-		//Verifica se ja nao esta programdo
-		command := fmt.Sprintf("ip addr show dev %s | grep %s | wc -l", eth, addrIP)
-		out, err = exec.Command("bash", "-c", command).Output()
-		if err != nil || out[0] == '0' { //Se nao estiver programado programa
-			command := fmt.Sprintf("echo 'intelbras' | sudo -kS  ip addr add %s/%s dev %s 2> /dev/null > /dev/null", addrIP, netMask, eth)
-			if Mode == "dev" {
-				command = fmt.Sprintf("ifconfig 2> /dev/null > /dev/null")
-			}
-
-			_, err = exec.Command("bash", "-c", command).Output()
-			if err != nil {
-				formatMessage(w, "ERR Falha ao configurar Eth%d [Err:%s]", index, err)
-				numErro++
-				continue //return 3
-			}
+	for index, iface := range Ifaces {
+		if configEth(w, index, iface) != nil {
+			numErro++
+			continue //return 3
 		}
 
-		formatMessage(w, "OK eth%d Pingando endereco %s!", index, addrIPToPing)
-		command = fmt.Sprintf("ping -c 3 %s 2> /dev/null > /dev/null", addrIPToPing)
+		//formatMessage(w, "OK interface:%s Pingando endereco %s ", iface.Name, _addrIPToPing)
+		command := fmt.Sprintf("ping -c 3 %s 2> /dev/null > /dev/null", _addrIPToPing)
 		_, err = exec.Command("bash", "-c", command).Output()
 		if err != nil {
-			formatMessage(w, "WARN Erro da Eth%d ao pingar endereço %s [Err: %s]", index, addrIPToPing, err)
+			formatMessage(w, "WARN Erro da Interface %s ao pingar endereço %s [Err: %s]", iface.Name, _addrIPToPing, err)
 			numErro++
 			continue //return 4
 		}
-		formatMessage(w, "OK PING OK da Eth%d", index)
+		formatMessage(w, "OK PING OK da interface:%s", iface.Name)
 
 	}
 
 	if numErro != 0 {
 		formatMessage(w, "ERR Falha ao Testar as interfaces de REDE")
+		return numErro
+	}
+
+	numIfaces := len(Ifaces)
+	if numIfaces < _numInterfaces {
+		formatMessage(w, "ERR Apenas %d Interfaces est(á)ão funcionando", numIfaces)
 		return numErro
 	}
 

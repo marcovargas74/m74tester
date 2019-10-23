@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"log/syslog"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -30,6 +31,9 @@ var Mode = "prod"
 
 //WorkDir é o diretorio de trabalho vai ser diferenta pra Dev ou Prod
 var WorkDir string
+
+//Ifaces interfaces de rede do equipamento
+var Ifaces []net.Interface
 
 //StartAppliance inicia o servidor http do appliance
 func StartAppliance(modo string) {
