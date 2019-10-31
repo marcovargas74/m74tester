@@ -6,13 +6,44 @@ import (
 	"net"
 	"net/http"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
 const (
 	_addrIPToPing  = "10.0.0.30"
 	_numInterfaces = 4
+	_sizeMaxRAM    = (8 * 1024)
 )
+
+func memTestRAM() error {
+	//Pega o tamanho da MEMORIA DISPONIVEL
+	//sizeRAM := 0
+	out, err := exec.Command("bash", "-c", `free -m | sed -n '/Mem/p' | awk '{print $4}'`).Output()
+	if err != nil {
+		return err
+	}
+
+	//Verifica se tamanho lido é compativel com o esparado
+	//strSizeRAM := string(out[0])
+	intSizeRAM, err := strconv.ParseInt(string(out[0]), (_sizeMaxRAM / 2), _sizeMaxRAM)
+	if err != nil {
+		//if sizeRAM[0] < (_sizeMaxRAM / 2) {
+		//err := fmt.Errorf("ERR tamanho %d menor do que o esperado %d", sizeRAM, _sizeMaxRAM)
+		return err
+	}
+
+	.....PArei AQUI 
+	//Roda o Teste
+	command := fmt.Sprintf("memtester %d 1", intSizeRAM)
+	out, err = exec.Command("bash", "-c", command).Output()
+	if err != nil {
+		return err
+	}
+	//memtester sizeRAM 1
+	//retorna o resultado do teste
+	return nil
+}
 
 func memoryTest(w http.ResponseWriter, r *http.Request) int {
 	formatMessage(w, "OK Inicio dos testes de memoria RAM")
@@ -31,6 +62,13 @@ func memoryTest(w http.ResponseWriter, r *http.Request) int {
 	if err != nil {
 		fmt.Println("erro: ", err)
 		formatMessage(w, "ERR Teste de escrita na SDRAM - ocorreu um erro")
+		return 1
+	}
+
+	err = memTestRAM()
+	if err != nil {
+		fmt.Println("erro: ", err)
+		formatMessage(w, "ERR %s", err)
 		return 1
 	}
 
