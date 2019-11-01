@@ -48,6 +48,7 @@ ls -l -h
 echo "Copia o arquivo binario para o REMOTE $IP_REMOTE!!!!"
 #ls -l
 
+
 scp $DIR_WORK_APP/examples/$APP_NAME  iap@$IP_REMOTE:/home/iap/appliance
 if [ $? -ne 0 ]; then
     echo "PARE o $APP_NAME e ENVIE NOVAMENTE !!!!!!!!!!!!!"
@@ -56,8 +57,8 @@ fi
 echo "Arquivo copiado para para $IP_REMOTE!!!"
 
 #echo "Copia as paginas para o REMOTE $IP_REMOTE!!!!"
-#scp -r $DIR_WORK_PUBLIC  iap@$IP_REMOTE:/home/iap/appliance
-#echo "PAginas copiado para para $IP_REMOTE!!!"
+scp -r $DIR_WORK_PUBLIC  iap@$IP_REMOTE:/home/iap/appliance
+echo "PAginas copiado para para $IP_REMOTE!!!"
 
 echo "--------------------------FIM------------------------------------"
 echo ""

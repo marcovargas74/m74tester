@@ -8,32 +8,40 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
 	_addrIPToPing  = "10.0.0.30"
 	_numInterfaces = 4
-	_sizeMaxRAM    = (8 * 1024)
+	_sizeMaxRAM    = (4 * 1024)
 )
 
 func memTestRAM() error {
 	//Pega o tamanho da MEMORIA DISPONIVEL
 	//sizeRAM := 0
-	out, err := exec.Command("bash", "-c", `free -m | sed -n '/Mem/p' | awk '{print $4}'`).Output()
+	//fmt.Println("memTestRAM inicio: ")
+
+	out, err := exec.Command("bash", "-c", `free -m | sed -n '/Mem/p' | awk '{print $2}'`).Output()
 	if err != nil {
 		return err
 	}
 
-	//Verifica se tamanho lido é compativel com o esparado
-	//strSizeRAM := string(out[0])
-	intSizeRAM, err := strconv.ParseInt(string(out[0]), (_sizeMaxRAM / 2), _sizeMaxRAM)
+	strSizeRAM := strings.Trim(string(out), "\n")
+	fmt.Printf("memTestRAM sizeRAM: %s %s  ", strSizeRAM, out)
+	intSizeRAM, err := strconv.ParseUint(strSizeRAM, 10, 0)
 	if err != nil {
-		//if sizeRAM[0] < (_sizeMaxRAM / 2) {
-		//err := fmt.Errorf("ERR tamanho %d menor do que o esperado %d", sizeRAM, _sizeMaxRAM)
+		fmt.Println(err)
 		return err
 	}
 
-	.....PArei AQUI 
+	//if intSizeRAM < (_sizeMaxRAM / 2) {
+	if intSizeRAM < (_sizeMaxRAM - 300) {
+		err := fmt.Errorf("ERR tamanho da memória %d menor do que o esperado %d", intSizeRAM, _sizeMaxRAM/2)
+		return err
+	}
+
+	fmt.Println("memTestRAM sizeRAM: ", intSizeRAM)
 	//Roda o Teste
 	command := fmt.Sprintf("memtester %d 1", intSizeRAM)
 	out, err = exec.Command("bash", "-c", command).Output()
@@ -68,12 +76,20 @@ func memoryTest(w http.ResponseWriter, r *http.Request) int {
 	err = memTestRAM()
 	if err != nil {
 		fmt.Println("erro: ", err)
-		formatMessage(w, "ERR %s", err)
+		formatMessage(w, "%s", err)
 		return 1
 	}
 
 	formatMessage(w, "OK Teste de escrita na SDRAM ocorreu com sucesso")
 	return 0
+
+}
+
+func waitingTest(w http.ResponseWriter, r *http.Request) {
+	//formatMessage(w, "INFO AGUARTE....")
+	s := time.Now().Format("15:04:05")
+	formatMessage(w, "%s Testando AGUARDE.... \n", s)
+	//formatMessage(w, "Aguarde....")
 
 }
 
@@ -202,7 +218,6 @@ func usbsTest(w http.ResponseWriter, r *http.Request) int {
 	//else
 	//fi
 
-	formatMessage(w, "Aguarde....")
 	return 0
 }
 

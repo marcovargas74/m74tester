@@ -65,6 +65,7 @@ func HandleFuncions() {
 	http.HandleFunc("/readfile", ReadFile)
 	http.HandleFunc("/iniselftest", SelfTestIni)
 	http.HandleFunc("/selftest", SelfTest)
+	http.HandleFunc("/wait", waitingTest)
 
 }
 

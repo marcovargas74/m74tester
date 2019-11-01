@@ -251,6 +251,7 @@ function selfTest(){
 		return ;
 	}*/
 
+	set_wait();
     $.ajax({
 		url: '/selftest', //name function
 		method: "POST",
@@ -382,6 +383,21 @@ function get_date()
 
 }
 
+function set_wait()
+{
+ 	$.ajax({
+		url: '/wait', //name function
+		method: "GET",
+		success: function(data) {
+			$("#response").html(data);
+			$('#saida1').append(data);
+		},
+	});
+	//$('#saida1').append("<font color='#2e802e' size='4'>Le Hora</font><br />");
+
+}
+
+
 function get_msg_harware()
 {
  	if(is_hardware_UnniTI())
@@ -413,10 +429,11 @@ function get_typeHardware()
 
 function set_test_appliance()
 {
-	arraySelfTest.push('memoria');
+	//arraySelfTest.push('memoria');
 	//arraySelfTest.push('flash');
 	//arraySelfTest.push('codecs');
 	arraySelfTest.push('usb');
+	arraySelfTest.push('memoria');
 	arraySelfTest.push('eths');
 	//arraySelfTest.push('eth1');
 	//arraySelfTest.push('eth2');
