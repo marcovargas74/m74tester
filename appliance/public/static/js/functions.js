@@ -97,12 +97,14 @@ $(document).ready(function(){
 		});*/
 		//$('#saida1').append("<font color='#2e802e' size='4'>Teste Hardware la vai</font><br />");
 		
-		$('#saida1').append("<font color='#2e802e' size='4'>Inicio dos Testes em</font><br />");
+	//	$('#saida1').append("<font color='#2e802e' size='4'>Inicio dos Testes em</font><br />");
 		//get_date();
+		$('#btnself').hide();
 		config_test();
 		selfTest();
 		//sendParamJsToGo(file_hard_conf)
 		//sendParamGoToJs(file_hard_conf)
+		
 	});
 	
 	$('#skipself').click(function(){
@@ -228,20 +230,47 @@ function selfTest(){
 	numeroSelfTest++;
 	if(param==undefined)
 	{
+		
 		/* finalizou a execucao de todos OS scripts entao verifica se tudo foi OK */
-		if(erro != 0)
+		if(erro == 0)
 		{
-			/* se estava aberto fecha o envio */
-			$('#envia_firmware').slideUp();
-		} else {
 			/* abre o envio de firmware */
 			fezselftest = true;
-			$('#envia_firmware').slideDown();
+			$('#grava_mac').slideDown();
+			$('#gm_grava').slideDown();
+			show_mac_wan_field();
+			//print_log("selfTest_FIM: DOWN:" + erro);
+			erro=0;
+			numeroSelfTest=0;
+			return;
+	
 		}
+		//print_log("selfTest_FIM: NumTestes:"+ numeroSelfTest +"Erros:" + erro);
+		//$('#envia_firmware').hide();
 		erro=0;
-		//print_log("selfTest_FIM: "+ numeroSelfTest);
+		numeroSelfTest=0;
+        return;
+	 			
+		/* finalizou a execucao de todos OS scripts entao verifica se tudo foi OK * /
+		if(erro != 0)
+		{
+			/* se estava aberto fecha o envio * /
+			$('#envia_firmware').slideUp();
+			print_log("selfTest_FIM: UP Erros:" + erro);
+	
+		} else {
+			/* abre o envio de firmware * /
+			fezselftest = true;
+			//$('#envia_firmware').slideDown();
+			$('#envia_firmware').hide();
+			print_log("selfTest_FIM: DOWN:" + erro);
+	
+		}
+		//print_log("selfTest_FIM: NumTestes:"+ numeroSelfTest +"Erros:" + erro);
+		erro=0;
 		numeroSelfTest=0;
 		return;
+		*/
 
 	}
 
@@ -389,11 +418,9 @@ function set_wait()
 		url: '/wait', //name function
 		method: "GET",
 		success: function(data) {
-			$("#response").html(data);
 			$('#saida1').append(data);
 		},
 	});
-	//$('#saida1').append("<font color='#2e802e' size='4'>Le Hora</font><br />");
 
 }
 

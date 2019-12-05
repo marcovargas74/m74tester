@@ -87,8 +87,10 @@ func memoryTest(w http.ResponseWriter, r *http.Request) int {
 
 func waitingTest(w http.ResponseWriter, r *http.Request) {
 	//formatMessage(w, "INFO AGUARTE....")
-	s := time.Now().Format("15:04:05")
-	formatMessage(w, "%s Testando AGUARDE.... \n", s)
+	hour := time.Now().Format("15:04:05")
+	//formatMessage(w, "%s Testando AGUARDE....", s)
+	fmt.Fprintf(w, "<valor><font size='3'>\t%s Testando AGUARDE...(aprox. 2 minutos)</font></valor><br />", hour)
+
 	//formatMessage(w, "Aguarde....")
 
 }
