@@ -147,7 +147,7 @@ $(document).ready(function(){
 				$('#imprimir_mac').slideDown();
 			} else {
 				$('#gm_grava').slideDown();
-				show_mac_wan_field();
+				show_mac_eth1_field();
 			}
 		});
 	});
@@ -237,8 +237,11 @@ function selfTest(){
 			/* abre o envio de firmware */
 			fezselftest = true;
 			$('#grava_mac').slideDown();
-			$('#gm_grava').slideDown();
-			show_mac_wan_field();
+			 $('#gm_grava').slideDown();
+			 $('#frm_mac').slideDown();
+			show_mac_eth1_field();
+			show_mac_eth2_field();
+			show_mac_eth3_field();
 			//print_log("selfTest_FIM: DOWN:" + erro);
 			erro=0;
 			numeroSelfTest=0;
@@ -460,13 +463,13 @@ function set_test_appliance()
 	//arraySelfTest.push('flash');
 	//arraySelfTest.push('codecs');
 	arraySelfTest.push('usb');
-	arraySelfTest.push('memoria');
-	arraySelfTest.push('eths');
+//T	arraySelfTest.push('memoria');
+//T	arraySelfTest.push('eths');
 	//arraySelfTest.push('eth1');
 	//arraySelfTest.push('eth2');
 	//arraySelfTest.push('eth3');
-//	arraySelfTest.push('wan');
-	arraySelfTest.push('ssd');
+    //arraySelfTest.push('wan');
+//T	arraySelfTest.push('ssd');
 
 }
 
@@ -496,10 +499,22 @@ function is_hardware_UnniTI()
 	return false;
 }
 
-function show_mac_wan_field()
+function show_mac_eth1_field()
 {
-	$('#gm_wan_show').slideDown();
+	$('#mac_eth1').slideDown();
 }
+
+function show_mac_eth2_field()
+{
+	$('#mac_eth2').slideDown();
+}
+
+function show_mac_eth3_field()
+{
+	$('#mac_eth3').slideDown();
+}
+
+
 
 function print_log(msg_log)
 {

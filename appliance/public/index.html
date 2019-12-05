@@ -70,7 +70,7 @@
 		<div class="centered">
 			<section>
 				<img src="static/images/logo_intelbras.svg" style="height: 40px">
-				<span class="titulo">TESTES APPLIANCE Intelbras GO</span>
+				<span class="titulo">TESTES APPLIANCE </span>
 			</section>
 
 			<section id="self_test">
@@ -97,22 +97,32 @@
 			</section>
 			
 			<section id="grava_mac" class="hide">
-				<div id="gm_busca">
+				<!-- div id="gm_busca">
 					<label>Buscar endere&ccedil;o MAC: </label><button id="busca_mac">Buscar</button>
-				</div>
-				<div id="mac_log" class="hide"></div>
+					<label>Gravar Endere&ccedil;o MAC: </label>
+				</div -->
+				<!-- div id="mac_log" class="hide"></div -->
 				<div id="gm_grava" class="hide">
+					<label>Gravar Endere&ccedil;o MAC: </label>
 					<form id="frm_mac" name="frm_mac">
 
-						<p>Erro ao buscar endere&ccedil;o MAC, insira manualmente: </p>
+						<!-- p>Erro ao buscar endere&ccedil;o MAC, insira manualmente: </p -->
 						
 						<div class="mac">
-							<label>MAC LAN : </label>
+							<label>MAC ETH0 : </label>
 							<input type="text" id="mac1" name="mac1" maxlength="17"/>
 						</div>
-						<div id="gm_wan_show" class="mac hide">
-							<label>MAC WAN: </label>
+						<div id="mac_eth1" class="mac hide">
+							<label>MAC ETH1: </label>
 							<input type="text" id="mac2" name="mac2" maxlength="17"/>
+						</div>
+						<div id="mac_eth2" class="mac hide">
+							<label>MAC ETH2: </label>
+							<input type="text" id="mac3" name="mac3" maxlength="17"/>
+						</div>
+						<div id="mac_eth3" class="mac hide">
+							<label>MAC ETH3: </label>
+							<input type="text" id="mac4" name="mac4" maxlength="17"/>
 						</div>
 					
 						<button type="submit">Gravar</button>
