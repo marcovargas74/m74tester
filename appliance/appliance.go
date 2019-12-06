@@ -66,6 +66,21 @@ func HandleFuncions() {
 	http.HandleFunc("/iniselftest", SelfTestIni)
 	http.HandleFunc("/selftest", SelfTest)
 	http.HandleFunc("/wait", waitingTest)
+	http.HandleFunc("/macrec", MacAddressRec)
+
+}
+
+//MacAddressRec grava endereco mac nas interfaces data
+func MacAddressRec(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	fmt.Println(r.Form)
+	fmt.Println(r.FormValue("aData"))
+
+	//fmt.Fprintf(w, "OKDataSendToJs:%d", 123)
+	fmt.Fprintf(w, "OK")
+
+	//testName := r.FormValue("param")
+	//fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>Grava MAC teste %s</font></valor>", testName)
 
 }
 

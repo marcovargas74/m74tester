@@ -174,7 +174,7 @@ $(document).ready(function(){
 			$('#msg').html("Favor preencher o MAC ETH0 corretamente, ex: 00:1a:3f:01:01:22");
 			return;
 		}
-	
+	/*
 		if(!validaMac(2)){
 			$('#msg').html("Favor preencher o MAC ETH1 corretamente, ex: 00:1a:3f:01:01:23");
 			return;
@@ -189,8 +189,37 @@ $(document).ready(function(){
 			$('#msg').html("Favor preencher o MAC ETH3 corretamente, ex: 00:1a:3f:01:01:23");
 			return;
 		}
-
-		$.post('mac.php',$(this).serialize(),function(data){
+        */
+		print_log("grava mac foi1" );	
+		//print_log("selfTest_FIM: DOWN:" + erro);	
+		
+		
+		//gravaMac(data)
+		
+		$.ajax({
+			//url: 'http://localhost:8080/testes',
+			url: '/macrec', //name function
+			method: "POST",
+			//data: {aData} ,
+			success: function(data) {
+				//$("#response").html(data);
+				//$('#saida1').append(data);
+				$('#swap').html(data);		
+				var resposta = $('#swap resposta').html();
+				if(resposta == "OK"){
+					$('#saida3').html("Mac gravado com sucesso!");
+					
+					//$("#response").html(data);
+					//$('#saida1').append(data);
+				}else
+				$('#saida3').html("FALHA AO GRAVAR MAC!");
+				
+			},
+		});
+		//$('#saida1').append("<font color='#2e802e' size='4'>macrec</font><br />");
+		
+		//Incluir codigo aqui 
+		/*$.post('mac.php',$(this).serialize(),function(data){
 			$('#swap').html(data);		
 
 			var resposta = $('#swap resposta').html();
@@ -198,7 +227,9 @@ $(document).ready(function(){
 				$('#saida3').html("Mac gravado com sucesso!");
 				$('#imprimir_mac').slideDown();
 			}
-		});
+		});*/
+
+
 	});
 });
 
@@ -564,4 +595,46 @@ function sendParamGoToJs(aData)
 
 
 }
+
+
+
+//Grava o MAC na placa do IAP 
+function gravaMac(aData)
+{
+	print_log("grava mac foi2" );	
+	/*
+	$.ajax({
+		//url: 'http://localhost:8080/testes',
+		url: '/macrec', //name function
+		method: "POST",
+		//data: {aData} ,
+		success: function(data) {
+			//$("#response").html(data);
+			//$('#saida1').append(data);
+			$('#swap').html(data);		
+			var resposta = $('#swap resposta').html();
+			if(resposta == "OK"){
+				$('#saida3').html("Mac gravado com sucesso!");
+				
+				//$("#response").html(data);
+				//$('#saida1').append(data);
+			}else
+			$('#saida3').html("FALHA AO GRAVAR MAC!");
+			
+		},
+	});
+	$('#saida1').append("<font color='#2e802e' size='4'>sendParamGoToJS</font><br />");
+*/
+
+
+
+	print_log("grava mac foi 3" );	
+	//print_log("selfTest_FIM: DOWN:" + erro);	
+	
+	
+	
+
+}
+
+
 
