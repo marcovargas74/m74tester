@@ -190,9 +190,12 @@ $(document).ready(function(){
 			return;
 		}
         */
-		print_log("grava mac foi1" );	
-		//print_log("selfTest_FIM: DOWN:" + erro);	
 		
+	   Pega MAC1	
+	   document.getElementById('msg').innerHTML = "";
+	   var mac1 = document.getElementById('mac'+1).value;
+	   print_log("grava mac foi1: " + mac1);	
+	  	
 		
 		//gravaMac(data)
 		
@@ -200,7 +203,7 @@ $(document).ready(function(){
 			//url: 'http://localhost:8080/testes',
 			url: '/macrec', //name function
 			method: "POST",
-			//data: {aData} ,
+			data: {mac1} ,
 			success: function(data) {
 				//$("#response").html(data);
 				//$('#saida1').append(data);

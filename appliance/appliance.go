@@ -74,13 +74,17 @@ func HandleFuncions() {
 func MacAddressRec(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fmt.Println(r.Form)
-	fmt.Println(r.FormValue("aData"))
+	//	fmt.Println(r.FormValue("aData"))
 
 	//fmt.Fprintf(w, "OKDataSendToJs:%d", 123)
 	fmt.Fprintf(w, "OK")
 
+	mac := r.FormValue("data")
+	fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>INFO MAC de %s</font></valor>", mac)
+
 	//testName := r.FormValue("param")
 	//fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>Grava MAC teste %s</font></valor>", testName)
+	fmt.Println("OK MacAddressRec")
 
 }
 
