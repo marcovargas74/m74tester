@@ -77,15 +77,26 @@ func MacAddressRec(w http.ResponseWriter, r *http.Request) {
 	//	fmt.Println(r.FormValue("aData"))
 
 	//fmt.Fprintf(w, "OKDataSendToJs:%d", 123)
-	fmt.Fprintf(w, "OK")
+	//fmt.Fprintf(w, "OK")
 
-	mac := r.FormValue("data")
-	fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>INFO MAC de %s</font></valor>", mac)
+	//mac := r.FormValue("data")
+	//fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>INFO MAC de %s</font></valor>", mac)
+
+	mac1 := r.FormValue("mac1")
+	mac2 := r.FormValue("mac2")
+	mac3 := r.FormValue("mac3")
+	mac4 := r.FormValue("mac4")
+	//fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>INFO Teste de %s</font></valor>", testName)
+	fmt.Println("MAC=" + mac1)
+	fmt.Println("MAC=" + mac2)
+	fmt.Println("MAC=" + mac3)
+	fmt.Println("MAC=" + mac4)
 
 	//testName := r.FormValue("param")
 	//fmt.Fprintf(w, "<valor><font color='#2e802e' size='4'>Grava MAC teste %s</font></valor>", testName)
 	fmt.Println("OK MacAddressRec")
-
+	//formatMessage(w, "OK MAC GRAVADO COM SUCESSO:%s", iface.Name)
+	formatMessage(w, "OK MAC GRAVADO COM SUCESSO")
 }
 
 //ReadFile Le arquivo

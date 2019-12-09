@@ -174,7 +174,7 @@ $(document).ready(function(){
 			$('#msg').html("Favor preencher o MAC ETH0 corretamente, ex: 00:1a:3f:01:01:22");
 			return;
 		}
-	/*
+	
 		if(!validaMac(2)){
 			$('#msg').html("Favor preencher o MAC ETH1 corretamente, ex: 00:1a:3f:01:01:23");
 			return;
@@ -189,50 +189,9 @@ $(document).ready(function(){
 			$('#msg').html("Favor preencher o MAC ETH3 corretamente, ex: 00:1a:3f:01:01:23");
 			return;
 		}
-        */
-		
-	   Pega MAC1	
-	   document.getElementById('msg').innerHTML = "";
-	   var mac1 = document.getElementById('mac'+1).value;
-	   print_log("grava mac foi1: " + mac1);	
-	  	
-		
-		//gravaMac(data)
-		
-		$.ajax({
-			//url: 'http://localhost:8080/testes',
-			url: '/macrec', //name function
-			method: "POST",
-			data: {mac1} ,
-			success: function(data) {
-				//$("#response").html(data);
-				//$('#saida1').append(data);
-				$('#swap').html(data);		
-				var resposta = $('#swap resposta').html();
-				if(resposta == "OK"){
-					$('#saida3').html("Mac gravado com sucesso!");
-					
-					//$("#response").html(data);
-					//$('#saida1').append(data);
-				}else
-				$('#saida3').html("FALHA AO GRAVAR MAC!");
-				
-			},
-		});
-		//$('#saida1').append("<font color='#2e802e' size='4'>macrec</font><br />");
-		
-		//Incluir codigo aqui 
-		/*$.post('mac.php',$(this).serialize(),function(data){
-			$('#swap').html(data);		
-
-			var resposta = $('#swap resposta').html();
-			if(resposta == "OK"){
-				$('#saida3').html("Mac gravado com sucesso!");
-				$('#imprimir_mac').slideDown();
-			}
-		});*/
-
-
+        $('#btnGravar').attr('disabled','disabled');
+		gravaMac()
+	
 	});
 });
 
@@ -602,36 +561,39 @@ function sendParamGoToJs(aData)
 
 
 //Grava o MAC na placa do IAP 
-function gravaMac(aData)
+//function gravaMac(mac1,mac2,mac3,mac4)
+function gravaMac()
 {
-	print_log("grava mac foi2" );	
-	/*
+	//Pega MAC1	
+	document.getElementById('msg').innerHTML = "";
+	var mac1 = document.getElementById('mac'+1).value;
+	var mac2 = document.getElementById('mac'+2).value;
+	var mac3 = document.getElementById('mac'+3).value;
+	var mac4 = document.getElementById('mac'+4).value;
+	
+	
 	$.ajax({
 		//url: 'http://localhost:8080/testes',
 		url: '/macrec', //name function
 		method: "POST",
-		//data: {aData} ,
+		data: {mac1, mac2, mac3, mac4} ,
 		success: function(data) {
 			//$("#response").html(data);
 			//$('#saida1').append(data);
 			$('#swap').html(data);		
 			var resposta = $('#swap resposta').html();
-			if(resposta == "OK"){
+			if(resposta == "0"){
 				$('#saida3').html("Mac gravado com sucesso!");
-				
+				//$('#imprimir_mac').slideDown();
 				//$("#response").html(data);
-				//$('#saida1').append(data);
+				$('#saida1').append(data);
 			}else
-			$('#saida3').html("FALHA AO GRAVAR MAC!");
+				$('#saida3').html("FALHA AO GRAVAR MAC!");
 			
 		},
 	});
-	$('#saida1').append("<font color='#2e802e' size='4'>sendParamGoToJS</font><br />");
-*/
 
-
-
-	print_log("grava mac foi 3" );	
+	//print_log("grava mac foi 3" );	
 	//print_log("selfTest_FIM: DOWN:" + erro);	
 	
 	
